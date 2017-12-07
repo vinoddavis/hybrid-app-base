@@ -19,11 +19,13 @@ export function verify() {
                         }, // success handler: fingerprint accepted
                         function(msg) {
                             deleteToken();
+                            reject(new Error("Fingerprint verification failed"));
                         } // error handler with errorcode and localised reason
                     );
                 }, // success handler: TouchID available
                 function(msg) {
                     deleteToken();
+                    reject(new Error("No Touch ID available"));
                 } // error handler: no TouchID available
             );
         } else if (device.platform === "Android") {
