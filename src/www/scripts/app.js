@@ -199,8 +199,8 @@ module.exports = (function() {
                     }
                 },
                 session: {
-                    shouldGenerateToken: persistentSessionEnabled,
-                    tokenStore: createTokenStore(persistentSessionEnabled && persistentSessionForceSecurity)
+                    shouldGenerateToken: requirePin,
+                    tokenStore: createTokenStore(requirePin)
                 },
                 ui: {
                     customLoginFn: function(messageCode) {
@@ -845,9 +845,8 @@ module.exports = (function() {
         } else if (finger) { //NEW
             try {
                 const token = await secureTokenStore.get();
-                const pinValue = await Pin.get();
-
-                if (token && pinValue) {
+                console.log("TOKEN --> " + token);
+                if (token) {
                     await FingerprintView.verify();
 
                     console.info("Successfully verified fingerprint");
