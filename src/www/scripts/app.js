@@ -6,6 +6,7 @@ import TokenStore from "./Token-store";
 
 import Pin from "./pin";
 import * as PinView from "./pinView";
+import * as FingerprintView from "./fingerprintView";
 import SecureStore from "./secure-store";
 import LocalStore from "./local-store";
 
@@ -21,7 +22,7 @@ require("../styles/login.css");
 module.exports = (function() {
     var defaultConfig = {
             files: {
-                js: [ "mxclientsystem/mxui/mxui.js" ],
+                js: ["mxclientsystem/mxui/mxui.js"],
                 css: [
                     "lib/bootstrap/css/bootstrap.min.css",
                     "mxclientsystem/mxui/ui/mxui.css",
@@ -32,9 +33,9 @@ module.exports = (function() {
         },
         appUrl = "";
 
-    var cacheDirectory;     // throwaway data, like resources.zip
+    var cacheDirectory; // throwaway data, like resources.zip
     var resourcesDirectory; // static resources private to app
-    var documentDirectory;  // downloaded documents
+    var documentDirectory; // downloaded documents
 
     var clickType = typeof document.ontouchstart === "undefined" ? "click" : "touchstart";
 
@@ -125,7 +126,7 @@ module.exports = (function() {
         }, interval);
     };
 
-    var createTokenStore = function(requirePin){
+    var createTokenStore = function(requirePin) {
         var tokenStore = new TokenStore(requirePin ? SecureStore : LocalStore);
 
         return {
@@ -187,9 +188,9 @@ module.exports = (function() {
                         let db = window.sqlitePlugin.openDatabase({ name: "MendixDatabase.db", location: 2 });
 
                         window.onbeforeunload = function(e) {
-                            db.close(function () {
+                            db.close(function() {
                                 console.log("DB closed!");
-                            }, function (error) {
+                            }, function(error) {
                                 console.log("Error closing DB: " + error.message);
                             });
                         };
@@ -198,8 +199,8 @@ module.exports = (function() {
                     }
                 },
                 session: {
-                    shouldGenerateToken: true,
-                    tokenStore: createTokenStore(requirePin)
+                    shouldGenerateToken: persistentSessionEnabled,
+                    tokenStore: createTokenStore(persistentSessionEnabled && persistentSessionForceSecurity)
                 },
                 ui: {
                     customLoginFn: function(messageCode) {
@@ -235,7 +236,7 @@ module.exports = (function() {
                      * setting page.
                      */
 
-                    if (requirePin) {
+                    if (window.localStorage.getItem("mx-user-pin") === "true") {
                         console.info("Setting up a pin");
 
                         replaceEventHandler("backbutton", handleBackButtonForAppWithPin, handleBackButton);
@@ -256,7 +257,7 @@ module.exports = (function() {
                     function startClient() {
                         console.info("Starting the client");
 
-                        if (requirePin) {
+                        if (window.localStorage.getItem("mx-user-pin") === "true") {
                             replaceEventHandler("backbutton", handleBackButton, handleBackButtonForAppWithPin);
                         }
 
@@ -297,7 +298,7 @@ module.exports = (function() {
                 window.dojoConfig.data.onlineBackend = {
                     getImgUriFn: function(url, callback, error) {
                         var fileTransfer = new FileTransfer();
-                        var tmpFile = cordova.file.tempDirectory  + "img" + (+ new Date()) + "-" + sequence++;
+                        var tmpFile = cordova.file.tempDirectory + "img" + (+new Date()) + "-" + sequence++;
 
                         // Workaround for issue introduced in 7.0.0, where url was of the wrong type (object instead of string)
                         url = (typeof url === 'string') ? url : url["0"];
@@ -305,7 +306,7 @@ module.exports = (function() {
                         fileTransfer.download(url, tmpFile, function(fileEntry) {
                             fileEntry.file(function(file) {
                                 var reader = new FileReader();
-                                reader.onload = function (evt) {
+                                reader.onload = function(evt) {
                                     var obj = evt.target.result;
                                     callback(obj);
                                 };
@@ -441,7 +442,7 @@ module.exports = (function() {
 
     var getLocalConfig = function() {
         return new Promise(function(resolve, reject) {
-            request(resourcesDirectory + "components.json?" + (+ new Date()), {
+            request(resourcesDirectory + "components.json?" + (+new Date()), {
                 method: "GET",
                 onLoad: function(status, result) {
                     try {
@@ -480,7 +481,7 @@ module.exports = (function() {
     var _downloadAppPackage = function(sourceUri, destinationUri) {
         return download(sourceUri, destinationUri, false, {
             headers: {
-                "Accept-Encoding" : ""
+                "Accept-Encoding": ""
             }
         }, createOnProgressHandler(__("Updating app")));
     };
@@ -572,14 +573,14 @@ module.exports = (function() {
 
                 // Since we don't have local files yet, we'll have to synchronize the package now (synchronously).
                 await synchronizePackage(sourceUri, destinationUri);
-                return [ remoteResult, resourcesDirectory ];
+                return [remoteResult, resourcesDirectory];
             }
 
             // If we found a local config, then we can try to determine if we need to upgrade, by checking against the remote config.
             try {
                 let remoteResult = await getRemoteConfig();
 
-                let updateConfig = async () => {
+                let updateConfig = async() => {
                     await synchronizePackage(sourceUri, destinationUri);
                     window.location.reload();
                 };
@@ -592,8 +593,7 @@ module.exports = (function() {
                         } else {
                             navigator.notification.confirm(__("An update is ready. Do you want to download it? (this may take a few moments)"),
                                 (buttonIndex) => buttonIndex === 1 && updateConfig(),
-                                __("Update ready"),
-                                [__("Yes"), __("No, update later")]
+                                __("Update ready"), [__("Yes"), __("No, update later")]
                             );
                         }
                     } else {
@@ -605,7 +605,7 @@ module.exports = (function() {
                 console.log('Unable to retrieve remote components.json');
             }
 
-            return [ localResult, resourcesDirectory];
+            return [localResult, resourcesDirectory];
         } else {
             let remoteResult = await getRemoteConfig();
 
@@ -620,9 +620,9 @@ module.exports = (function() {
                     await synchronizePackage(sourceUri, destinationUri);
                 }
 
-                return [ remoteResult, resourcesDirectory ];
+                return [remoteResult, resourcesDirectory];
             } else {
-                return [ remoteResult, url ];
+                return [remoteResult, url];
             }
         }
     };
@@ -705,8 +705,18 @@ module.exports = (function() {
             password.length > 0
         );
     };
-
-    var initialize = async function(url, enableOffline, requirePin, username, password, updateAsync) {
+    /**
+     * Initialize
+     * ---
+     * Initializes the app with the required security configuration
+     * 
+     * @author Conner Charlebois
+     * @since Dec 7, 2017
+     */
+    // MxApp.initialize(settings.url,
+    //     settings.enableOffline, settings.persistentSession.enabled, settings.persistentSession.forceSecurity,
+    //     userPin, userFingerprint, settings.username, settings.password, settings.updateAsync);
+    var initialize = async function(url, enableOffline, persistentSessionEnabled, persistentSessionForceSecurity, pin, finger, username, password, updateAsync) {
         enableOffline = !!enableOffline;
 
         // Make sure the url always ends with a /
@@ -719,15 +729,15 @@ module.exports = (function() {
         setupDirectoryLocations();
 
         const localTokenStore = new TokenStore(LocalStore);
-        const secureTokenStore = requirePin ? new TokenStore(SecureStore) : undefined;
+        const secureTokenStore = (persistentSessionEnabled && persistentSessionForceSecurity) ? new TokenStore(SecureStore) : undefined;
 
         var shouldDownloadFn = function(config) {
             return config.downloadResources || enableOffline;
         };
 
-        const reflect = function(promise){
-            return promise.then(function(v){ return {v:v, status: "resolved" }},
-                function(e){ return {e:e, status: "rejected" }});
+        const reflect = function(promise) {
+            return promise.then(function(v) { return { v: v, status: "resolved" } },
+                function(e) { return { e: e, status: "rejected" } });
         };
 
         const cleanUpRemains = async function() {
@@ -754,14 +764,14 @@ module.exports = (function() {
                         });
                     });
                 }
-            } catch(e) {
+            } catch (e) {
                 console.info("Could not clean remaining session data; maybe they were already removed: ", e ? e : "no details");
             }
         };
 
         const syncAndStartup = async function() {
             const [config, resourcesUrl] = await synchronizeResources(appUrl, enableOffline, shouldDownloadFn, updateAsync);
-            await startup(config, resourcesUrl, appUrl, enableOffline, requirePin);
+            await startup(config, resourcesUrl, appUrl, enableOffline, (persistentSessionEnabled && persistentSessionForceSecurity));
         };
 
         const logout = function() {
@@ -794,6 +804,14 @@ module.exports = (function() {
             });
         };
 
+        /**
+         * DO THE RIGHT LOGIN
+         * ---
+         * hopefully, it logs you in
+         * 
+         * @author Conner Charlebois
+         * @since Dec 7, 2017
+         */
         if (credentialsProvided(username, password)) {
             try {
                 await cleanUpRemains();
@@ -803,7 +821,7 @@ module.exports = (function() {
 
                 window.location.reload(true);
             }
-        } else if (requirePin) {
+        } else if (pin) {
             try {
                 const token = await secureTokenStore.get();
                 const pinValue = await Pin.get();
@@ -824,13 +842,40 @@ module.exports = (function() {
                 await logout();
                 await cleanUpRemains();
             }
+        } else if (finger) { //NEW
+            try {
+                const token = await secureTokenStore.get();
+                const pinValue = await Pin.get();
+
+                if (token && pinValue) {
+                    await FingerprintView.verify();
+
+                    console.info("Successfully verified fingerprint");
+                } else {
+                    console.info("No fingerprint and/or token");
+
+                    await logout();
+                    await cleanUpRemains();
+                }
+            } catch (e) {
+                console.info("Failed to verify fingerprint");
+
+                await logout();
+                await cleanUpRemains();
+            }
+        } else if (persistentSessionForceSecurity) {
+            // require either fingerprint of pin for a persistent session
+            await logout();
+            await cleanUpRemains();
+        } else {
+            // something?
         }
 
         try {
             console.info("Syncing and starting up");
 
             await syncAndStartup();
-        } catch(e) {
+        } catch (e) {
             console.info("Failed to sync and startup");
 
             await handleError(e ? e : new Error("Failed to sync and startup."));
@@ -857,8 +902,8 @@ module.exports = (function() {
                 method: "post",
                 headers: { "Content-Type": "application/json" },
                 data: JSON.stringify({
-                    action : "login",
-                    params : {
+                    action: "login",
+                    params: {
                         username: username,
                         password: password
                     }

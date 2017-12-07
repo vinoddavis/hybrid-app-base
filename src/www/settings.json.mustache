@@ -1,8 +1,11 @@
 {
   "url": "{{{url}}}",
-  "enableOffline": {{#enableOffline}}{{enableOffline}}{{/enableOffline}}{{^enableOffline}}false{{/enableOffline}},
-  "requirePin": {{#requirePin}}{{requirePin}}{{/requirePin}}{{^requirePin}}false{{/requirePin}},
+  "enableOffline": {{enableOffline}},
   "updateAsync": {{#updateAsync}}{{updateAsync}}{{/updateAsync}}{{^updateAsync}}false{{/updateAsync}},
+  "persistentSession": {
+	  "enabled": {{persistentSession.enabled}},
+	  "forceSecurity": {{persistentSession.forceSecurity}}
+  },
   "username": "{{username}}",
   "password": "{{password}}"
 }
