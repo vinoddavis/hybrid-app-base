@@ -866,9 +866,12 @@ module.exports = (function() {
                 await cleanUpRemains();
             }
         } else if (persistentSessionForceSecurity) {
-            // require either fingerprint of pin for a persistent session
-            await logout();
-            await cleanUpRemains();
+            var loginUsername = document.getElementById("mx-username");
+            var loginPassword = document.getElementById("mx-password");
+            if (credentialsProvided(loginUsername.value, loginPassword.value)) {
+                await cleanUpRemains();
+                await createSessionWithCredentials(appUrl, loginUsername.value, loginPassword.value);
+            }
         } else {
             // something?
         }
