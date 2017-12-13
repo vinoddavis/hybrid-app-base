@@ -698,7 +698,6 @@ module.exports = (function() {
     };
 
     var credentialsProvided = function(username, password) {
-        console.log("checking credentials: [username:password] [" + username + ":" + password + "]");
         return (
             typeof username !== 'undefined' &&
             username.length > 0 &&
@@ -718,8 +717,6 @@ module.exports = (function() {
     //     settings.enableOffline, settings.persistentSession.enabled, settings.persistentSession.forceSecurity,
     //     userPin, userFingerprint, settings.username, settings.password, settings.updateAsync);
     var initialize = async function(url, enableOffline, persistentSessionEnabled, persistentSessionForceSecurity, pin, finger, username, password, updateAsync) {
-        console.log("initialize called with the following arguments:")
-        console.log(arguments);
         enableOffline = !!enableOffline;
 
         // Make sure the url always ends with a /
@@ -866,12 +863,9 @@ module.exports = (function() {
                 await cleanUpRemains();
             }
         } else if (persistentSessionForceSecurity) {
-            var loginUsername = document.getElementById("mx-username");
-            var loginPassword = document.getElementById("mx-password");
-            if (credentialsProvided(loginUsername.value, loginPassword.value)) {
-                await cleanUpRemains();
-                await createSessionWithCredentials(appUrl, loginUsername.value, loginPassword.value);
-            }
+            // require either fingerprint of pin for a persistent session
+            await logout();
+            await cleanUpRemains();
         } else {
             // something?
         }
