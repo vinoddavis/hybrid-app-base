@@ -862,12 +862,8 @@ module.exports = (function() {
                 await logout();
                 await cleanUpRemains();
             }
-        } else if (persistentSessionForceSecurity) {
-            // require either fingerprint of pin for a persistent session
-            await logout();
-            await cleanUpRemains();
         } else {
-            // something?
+            // something? (default for now)
         }
 
         try {
