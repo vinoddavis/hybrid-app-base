@@ -5,12 +5,10 @@ const Settings = require("./settings");
 document.addEventListener("deviceready", function() {
     Settings.loadJSON("settings.json", function(response) {
         let settings = JSON.parse(response);
-        var userPin = localStorage.getItem("mx-user-pin") === "true",
-            userFingerprint = localStorage.getItem("mx-user-finger") === "true";
-
-        MxApp.initialize(settings.url, settings.enableOffline, settings.persistentSession.enabled,
-            settings.persistentSession.forceSecurity, userPin, userFingerprint, settings.username,
-            settings.password, settings.updateAsync);
+        MxApp.initialize(settings.url,
+            settings.enableOffline, settings.requirePin,
+            settings.username, settings.password,
+            settings.updateAsync);
     });
 });
 
