@@ -6,7 +6,6 @@ import TokenStore from "./Token-store";
 
 import Pin from "./pin";
 import * as PinView from "./pinView";
-import * as FingerprintView from "./fingerprintView";
 import SecureStore from "./secure-store";
 import LocalStore from "./local-store";
 
@@ -239,7 +238,7 @@ module.exports = (function() {
                      * setting page.
                      */
 
-                    if (window.localStorage.getItem("mx-user-pin") === "true") {
+                    if (requirePin) {
                         console.info("Setting up a pin");
 
                         replaceEventHandler("backbutton", handleBackButtonForAppWithPin, handleBackButton);
@@ -260,7 +259,7 @@ module.exports = (function() {
                     function startClient() {
                         console.info("Starting the client");
 
-                        if (window.localStorage.getItem("mx-user-pin") === "true") {
+                        if (requirePin) {
                             replaceEventHandler("backbutton", handleBackButton, handleBackButtonForAppWithPin);
                         }
 
@@ -708,18 +707,8 @@ module.exports = (function() {
             password.length > 0
         );
     };
-    /**
-     * Initialize
-     * ---
-     * Initializes the app with the required security configuration
-     * 
-     * @author Conner Charlebois
-     * @since Dec 7, 2017
-     */
-    // MxApp.initialize(settings.url,
-    //     settings.enableOffline, settings.persistentSession.enabled, settings.persistentSession.forceSecurity,
-    //     userPin, userFingerprint, settings.username, settings.password, settings.updateAsync);
-    var initialize = async function(url, enableOffline, persistentSessionEnabled, persistentSessionForceSecurity, pin, finger, username, password, updateAsync) {
+
+    var initialize = async function(url, enableOffline, requirePin, username, password, updateAsync) {
         enableOffline = !!enableOffline;
 
         // Make sure the url always ends with a /
@@ -732,7 +721,7 @@ module.exports = (function() {
         setupDirectoryLocations();
 
         const localTokenStore = new TokenStore(LocalStore);
-        const secureTokenStore = (persistentSessionEnabled && persistentSessionForceSecurity) ? new TokenStore(SecureStore) : undefined;
+        const secureTokenStore = requirePin ? new TokenStore(SecureStore) : undefined;
 
         var shouldDownloadFn = function(config) {
             return config.downloadResources || enableOffline;
@@ -784,7 +773,7 @@ module.exports = (function() {
 
         const syncAndStartup = async function() {
             const [config, resourcesUrl] = await synchronizeResources(appUrl, enableOffline, shouldDownloadFn, updateAsync);
-            await startup(config, resourcesUrl, appUrl, enableOffline, (persistentSessionEnabled && persistentSessionForceSecurity));
+            await startup(config, resourcesUrl, appUrl, enableOffline, requirePin);
         };
 
         const logout = function() {
@@ -817,14 +806,6 @@ module.exports = (function() {
             });
         };
 
-        /**
-         * DO THE RIGHT LOGIN
-         * ---
-         * hopefully, it logs you in
-         * 
-         * @author Conner Charlebois
-         * @since Dec 7, 2017
-         */
         if (credentialsProvided(username, password)) {
             try {
                 await cleanUpRemains();
@@ -834,7 +815,7 @@ module.exports = (function() {
 
                 window.location.reload(true);
             }
-        } else if (pin) {
+        } else if (requirePin) {
             try {
                 const token = await secureTokenStore.get();
                 const pinValue = await Pin.get();
@@ -855,28 +836,6 @@ module.exports = (function() {
                 await logout();
                 await cleanUpRemains();
             }
-        } else if (finger) { //NEW
-            try {
-                const token = await secureTokenStore.get();
-                console.log("TOKEN --> " + token);
-                if (token) {
-                    await FingerprintView.verify();
-
-                    console.info("Successfully verified fingerprint");
-                } else {
-                    console.info("No fingerprint and/or token");
-
-                    await logout();
-                    await cleanUpRemains();
-                }
-            } catch (e) {
-                console.info("Failed to verify fingerprint");
-
-                await logout();
-                await cleanUpRemains();
-            }
-        } else {
-            // something? (default for now)
         }
 
         try {
