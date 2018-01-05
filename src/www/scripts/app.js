@@ -185,7 +185,10 @@ module.exports = (function() {
                 },
                 store: {
                     createStoreFn: function() {
-                        let db = window.sqlitePlugin.openDatabase({ name: "MendixDatabase.db", location: 2 });
+                        let db = window.sqlitePlugin.openDatabase({
+                            name: "MendixDatabase.db",
+                            location: 2
+                        });
 
                         window.onbeforeunload = function(e) {
                             db.close(function() {
@@ -580,8 +583,8 @@ module.exports = (function() {
             try {
                 let remoteResult = await getRemoteConfig();
 
-                let updateConfig = async() => {
-                    await synchronizePackage(sourceUri, destinationUri);
+                let updateConfig = async () => {
+                    await synchronizePackage(sourceUri + "?" + remoteResult.cachebust, destinationUri);
                     window.location.reload();
                 };
 
@@ -736,8 +739,18 @@ module.exports = (function() {
         };
 
         const reflect = function(promise) {
-            return promise.then(function(v) { return { v: v, status: "resolved" } },
-                function(e) { return { e: e, status: "rejected" } });
+            return promise.then(function(v) {
+                    return {
+                        v: v,
+                        status: "resolved"
+                    }
+                },
+                function(e) {
+                    return {
+                        e: e,
+                        status: "rejected"
+                    }
+                });
         };
 
         const cleanUpRemains = async function() {
@@ -895,7 +908,9 @@ module.exports = (function() {
                 timeout: 5000,
                 onLoad: callback,
                 method: "post",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json"
+                },
                 data: JSON.stringify({
                     action: "login",
                     params: {
