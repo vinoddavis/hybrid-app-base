@@ -351,7 +351,7 @@ module.exports = (function() {
         });
     };
 
-    var startupMessage = window.sessionStorage.getItem("refreshData") ? __("Synchronizing...") : __("Starting app...");
+    var startupMessage = window.sessionStorage.getItem("refreshData") ? __("Synchronizing...") : __("");
     var startup = withProgressMessage(_startup, startupMessage);
 
     var isAbsolute = function(url) {
@@ -486,10 +486,10 @@ module.exports = (function() {
             headers: {
                 "Accept-Encoding": ""
             }
-        }, createOnProgressHandler(__("Updating app")));
+        }, createOnProgressHandler(__("")));
     };
 
-    var downloadAppPackage = withProgressMessage(_downloadAppPackage, __("Updating app..."));
+    var downloadAppPackage = withProgressMessage(_downloadAppPackage, __(""));
 
     var removeFile = function(fileUri) {
         return new Promise(function(resolve, reject) {
@@ -513,7 +513,7 @@ module.exports = (function() {
         });
     };
 
-    var removeRecursively = withProgressMessage(_removeRecursively, __("Optimizing for your device..."));
+    var removeRecursively = withProgressMessage(_removeRecursively, __(""));
 
     var unzip = function(sourceUri, destinationUri) {
         return new Promise(function(resolve, reject) {
@@ -523,7 +523,7 @@ module.exports = (function() {
                 } else {
                     reject();
                 }
-            }, createOnProgressHandler(__("Optimizing for your device")));
+            }, createOnProgressHandler(__("")));
         });
     };
 
