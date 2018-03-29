@@ -1,0 +1,11 @@
+{
+  "url": "{{{url}}}",
+  "enableOffline": {{enableOffline}},
+  "updateAsync": {{#updateAsync}}{{updateAsync}}{{/updateAsync}}{{^updateAsync}}false{{/updateAsync}},
+  "persistentSession": {
+	  "enabled": {{persistentSession.enabled}},
+	  "forceSecurity": {{persistentSession.forceSecurity}}
+  },
+  "username": "{{username}}",
+  "password": "{{password}}"
+}
