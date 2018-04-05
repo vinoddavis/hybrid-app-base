@@ -1,3 +1,4 @@
+// comment
 "use strict";
 import "babel-polyfill";
 
@@ -583,7 +584,7 @@ module.exports = (function() {
             try {
                 let remoteResult = await getRemoteConfig();
 
-                let updateConfig = async () => {
+                let updateConfig = async() => {
                     await synchronizePackage(sourceUri + "?" + remoteResult.cachebust, destinationUri);
                     window.location.reload();
                 };
