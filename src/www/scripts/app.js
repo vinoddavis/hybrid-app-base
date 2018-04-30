@@ -11,15 +11,6 @@ import * as FingerprintView from "./fingerprintView";
 import SecureStore from "./secure-store";
 import LocalStore from "./local-store";
 
-function requireAll(requireContext) {
-    return requireContext.keys().map(requireContext);
-}
-
-requireAll(require.context("template/styles"));
-
-require("../styles/index.css");
-require("../styles/login.css");
-
 module.exports = (function() {
     var defaultConfig = {
             files: {
