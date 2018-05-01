@@ -15,7 +15,7 @@
     Instead, Phonegap Build derives the platform versions from the CLI
     defaults.
     -->
-    <preference name="phonegap-version" value="cli-7.0.1" />
+    <preference name="phonegap-version" value="cli-7.1.0" />
 
     <!-- allow assets to be loaded and open links in the app itself, see: http://phonegap.com/blog/2012/03/20/access-tags/ -->
     <!-- Issue 204079: Allow retrieval of any resource. Custom widgets can point to anything. -->
@@ -24,12 +24,11 @@
     <!-- Force the default architecture for Android to ARM -->
     <plugin name="com.darktalker.cordova.screenshot" source="npm" spec="0.1.6" />
     <plugin name="com.telerik.plugins.nativepagetransitions" source="npm" spec="0.6.5" />
-    <plugin name="cordova-build-architecture" source="git" spec="https://github.com/MBuchalik/cordova-build-architecture.git#v1.0.1" />
+    <plugin name="cordova-build-architecture" source="git" spec="https://github.com/MBuchalik/cordova-build-architecture.git#v1.0.3" />
     <plugin name="cordova-plugin-actionsheet" source="npm" spec="2.3.3" />
     <plugin name="cordova-plugin-android-permissions" source="npm" spec="0.10.0" />
     <plugin name="cordova-plugin-app-version" source="npm" spec="0.1.8" />
     <plugin name="cordova-plugin-battery-status" source="npm" spec="1.1.2" />
-    <plugin name="cordova-plugin-console" source="npm" spec="1.0.3" />
     <plugin name="cordova-plugin-cookieemperor" spec="https://github.com/rtk/cordova-cookie-emperor.git" />
     <plugin name="cordova-plugin-device" source="npm" spec="1.1.2" />
     <plugin name="cordova-plugin-device-motion" source="npm" spec="1.2.1" />
@@ -49,7 +48,6 @@
     <plugin name="cordova-plugin-zip" source="npm" spec="3.1.0" />
     <plugin name="cordova-plugin-whitelist" source="npm" spec="1.2.2" />
     <plugin name="cordova-sqlite-storage-pgb" source="git" spec="https://github.com/mendix/Cordova-sqlite-storage-pgb.git#storage-master" />
-    <plugin name="phonegap-plugin-push" source="npm" spec="1.5.3" />
     <plugin name="uk.co.workingedge.phonegap.plugin.launchnavigator" source="npm" version="2.9.11"/>
 
     {{#permissions.calendar}}
@@ -100,6 +98,10 @@
     {{#permissions.microphone}}
         <plugin name="cordova-plugin-media" source="npm" spec="2.3.0" />
     {{/permissions.microphone}}
+
+    {{#permissions.push}}
+        <plugin name="phonegap-plugin-push" source="npm" spec="1.5.3" />
+    {{/permissions.push}}
 
     {{#iosEnabled}}
         <!-- On iOS, the statusbar is transparent by default and is drawn over the top of our app. -->
@@ -156,18 +158,30 @@
 
         <plugin name="cordova-plugin-whitelist" source="npm" spec="1.2.2" />
         <plugin name="cordova-plugin-android-permissions" source="npm" version="0.10.0" />
+        <plugin name="cordova-android-support-gradle-release" source="npm" version="1.2.0">
+            <variable name="ANDROID_SUPPORT_VERSION" value="27.0.0" />
+        </plugin>
+        <plugin name="cordova-android-play-services-gradle-release" source="npm" version="1.2.0">
+            <variable name="PLAY_SERVICES_VERSION" value="11.8.0" />
+        </plugin>
 
+        <preference name="android-minSdkVersion" value="19" />
         <preference name="android-targetSdkVersion" value="23" />
 
         <platform name="android">
             {{#androidImages}}
                 <!-- Icon definitions - for more details: http://developer.android.com/guide/topics/resources/providing-resources.html -->
-                <{{{tag}}} src="{{{filename}}}" density="{{{qualifier}}}"/>
+                {{#density}}
+                    <{{{tag}}} src="{{{filename}}}" density="{{{density}}}"/>
+                {{/density}}
+                {{#qualifier}}
+                    <{{{tag}}} src="{{{filename}}}" density="{{{qualifier}}}"/>
+                {{/qualifier}}
             {{/androidImages}}
         </platform>
     {{/androidEnabled}}
 
-    <splash src="splash.png" />
+    <splash src="res/android/screen-xxxhdpi-portrait.png" />
 
     {{{customConfiguration}}}
 </widget>

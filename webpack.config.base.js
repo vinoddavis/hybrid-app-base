@@ -35,8 +35,7 @@ module.exports = function(env) {
         devtool: "eval-source-map",
         module: {
             // Rules are used to process specific file types
-            rules: [
-                {
+            rules: [{
                     test: /\.css$/,
                     use: "css-loader"
                 },
@@ -50,11 +49,13 @@ module.exports = function(env) {
                     use: {
                         loader: 'babel-loader',
                         options: {
-                            presets: [['env', {
-                                "targets": {
-                                    "uglify": true
-                                }
-                            }]],
+                            presets: [
+                                ['env', {
+                                    "targets": {
+                                        "uglify": true
+                                    }
+                                }]
+                            ],
                             plugins: ["transform-regenerator"],
                             cacheDirectory: true
                         }
@@ -82,8 +83,7 @@ module.exports = function(env) {
                     }
                 })
             ),
-            new CopyWebpackPlugin([
-                {
+            new CopyWebpackPlugin([{
                     context: path.dirname(default_splash_path),
                     from: path.basename(default_splash_path),
                     to: path.basename(default_splash_path)

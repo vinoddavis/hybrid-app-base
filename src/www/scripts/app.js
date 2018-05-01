@@ -136,8 +136,10 @@ module.exports = (function() {
                 });
             },
             remove: function(callback) {
+
                 console.log("Removing TOKEN");
                 tokenStore.remove().then(callback, callback);
+
             }
         }
     };

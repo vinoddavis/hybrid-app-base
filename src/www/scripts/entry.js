@@ -3,6 +3,7 @@ const Settings = require("./settings");
 
 // Make sure to include the scheme (e.g. http://) in the URL.
 document.addEventListener("deviceready", function() {
+    // alert("hello yalc");
     Settings.loadJSON("settings.json", function(response) {
         let settings = JSON.parse(response);
         var userPin = localStorage.getItem("mx-user-pin") === "true",
