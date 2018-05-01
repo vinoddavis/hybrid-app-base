@@ -118,7 +118,7 @@ module.exports = (function() {
         }, interval);
     };
 
-    var createTokenStore = function(requirePin) {
+    var createTokenStore = function(requirePin, authSupplied) {
         var tokenStore = new TokenStore(requirePin ? SecureStore : LocalStore);
 
         return {
@@ -128,23 +128,33 @@ module.exports = (function() {
             },
             get: function(callback) {
                 console.log("Getting TOKEN:");
-                tokenStore.get().then(function(token) {
-                    console.log("Got TOKEN " + token);
-                    if (callback) callback(token);
-                }, function(e) {
+                if (authSupplied) {
+                    tokenStore.get().then(function(token) {
+                        console.log("Got TOKEN " + token);
+                        if (callback) callback(token);
+                    }, function(e) {
+                        if (callback) callback(undefined);
+                    });
+                } else {
+                    console.log("Not able to get token since no auth has been provided");
                     if (callback) callback(undefined);
-                });
+                }
+
             },
             remove: function(callback) {
-
-                console.log("Removing TOKEN");
-                tokenStore.remove().then(callback, callback);
+                if (authSupplied) {
+                    console.log("Removing TOKEN");
+                    tokenStore.remove().then(callback, callback);
+                } else {
+                    console.log("NOT removing TOKEN since no auth supplied")
+                    if (callback) callback();
+                }
 
             }
         }
     };
 
-    var _startup = function(config, url, appUrl, enableOffline, requirePin) {
+    var _startup = function(config, url, appUrl, enableOffline, requirePin, authSupplied) {
         return new Promise(function(resolve, reject) {
             window.dojoConfig = {
                 appbase: url,
@@ -197,7 +207,7 @@ module.exports = (function() {
                 },
                 session: {
                     shouldGenerateToken: requirePin,
-                    tokenStore: createTokenStore(requirePin)
+                    tokenStore: createTokenStore(requirePin, authSupplied)
                 },
                 ui: {
                     customLoginFn: function(messageCode) {
@@ -778,7 +788,7 @@ module.exports = (function() {
 
         const syncAndStartup = async function() {
             const [config, resourcesUrl] = await synchronizeResources(appUrl, enableOffline, shouldDownloadFn, updateAsync);
-            await startup(config, resourcesUrl, appUrl, enableOffline, (persistentSessionEnabled && persistentSessionForceSecurity));
+            await startup(config, resourcesUrl, appUrl, enableOffline, (persistentSessionEnabled && persistentSessionForceSecurity), (finger || pin));
         };
 
         const logout = function() {
@@ -871,6 +881,8 @@ module.exports = (function() {
             }
         } else {
             // something? (default for now)
+            console.log("no credentials, fingerprint, or pin provided. Logging out.")
+            await logout();
         }
 
         try {
