@@ -311,6 +311,7 @@ module.exports = (function() {
                                 resolve2();
                             });
                         }
+                        resolve2();
                     })
                     Promise.all([cookiePromise1, cookiePromise2]).then(function() {
                         console.log("cookies cleared");
@@ -867,6 +868,7 @@ module.exports = (function() {
                                 resolve2();
                             });
                         }
+                        resolve2();
                     })
                     Promise.all([cookiePromise1, cookiePromise2]).then(function() {
                         console.log("cookies cleared");
