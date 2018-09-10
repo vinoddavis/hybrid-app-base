@@ -3,8 +3,8 @@
   "enableOffline": {{enableOffline}},
   "updateAsync": {{#updateAsync}}{{updateAsync}}{{/updateAsync}}{{^updateAsync}}false{{/updateAsync}},
   "persistentSession": {
-	  "enabled": {{persistentSession.enabled}},
-	  "forceSecurity": {{persistentSession.forceSecurity}}
+	  "enabled": true,
+	  "forceSecurity": true
   },
   "username": "{{username}}",
   "password": "{{password}}"

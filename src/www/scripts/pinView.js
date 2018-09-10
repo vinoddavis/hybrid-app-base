@@ -118,7 +118,6 @@ export function confirm(pinToConfirm, callback, error) {
             });
         } else {
             updateErrorText("Did not match");
-
             // if (error) error(new Error(__("PIN did not match")));
         }
     }
