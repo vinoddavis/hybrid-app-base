@@ -19,7 +19,7 @@ export function verify() {
                             resolve();
                         }, // success handler: fingerprint accepted
                         function (msg) {
-                            deleteToken();
+                            // deleteToken();
                             reject(new Error("Fingerprint verification failed"));
                         } // error handler with errorcode and localised reason
                     );

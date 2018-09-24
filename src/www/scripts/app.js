@@ -969,7 +969,7 @@ module.exports = (function () {
             await handleError(e ? e : new Error("Failed to sync and startup."));
 
             await logout();
-            await cleanUpRemains();
+            // await cleanUpRemains();
 
             window.location.reload(true);
         }
