@@ -66,7 +66,7 @@ export function verify() {
             } else if (result.withBackup) {
                 console.log("Authenticated with backup password");
             }
-            resolve();
+            resolve("touch");
         }
 
         function androidEncryptFailureCallback(error) {
