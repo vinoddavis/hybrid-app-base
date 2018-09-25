@@ -53,7 +53,7 @@ export function verify() {
 
         function androidIsAvailableError(message) {
             console.log("isAvailableError(): " + message);
-            deleteToken();
+            // deleteToken();
         }
 
         function androidEncryptSuccessCallback(result) {
