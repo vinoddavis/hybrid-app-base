@@ -105,8 +105,14 @@ export function isBiometricsAvailable() {
         } else if (device.platform === "Android") {
             FingerprintAuth.isAvailable(
                 function (type) {
-                    console.log("Biometrics type2:" + type);
-                    resolve("touch");
+                    if (type.isAvailable == false) {
+                        console.log("Biometrics type2:" + type.isAvailable);
+                        resolve(null);
+                    }
+                    else {
+                        console.log("Biometrics type2:" + type.isAvailable);
+                        resolve("touch");
+                    }
                 }, // success handler: TouchID available
                 function (msg) {
                     resolve(null);

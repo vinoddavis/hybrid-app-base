@@ -40,6 +40,7 @@ export function verify() {
                 let attemptsLeft = await Pin.getAttemptsLeft();
                 if (attemptsLeft === 0) {
                     forgetPinAction();
+                    Pin.setAttemptsLeft(3);
                 } else {
                     updateErrorText(__("Invalid PIN"));
                     cleanUserInput();
