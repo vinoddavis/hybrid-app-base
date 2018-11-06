@@ -332,7 +332,9 @@ module.exports = (function () {
                 window.dojoConfig.ui.openUrlFn = function (url, fileName, windowName) {
                     download(url, cordova.file.externalCacheDirectory + fileName, false, {}, null)
                         .then(function (fe) {
-                            cordova.InAppBrowser.open(fe.toURL(), "_system");
+							fe.file(function(file) {
+                                cordova.plugins.fileOpener2.open(fe.toInternalURL(), file.type);
+                            });
                         })
                         .catch(function (e) {
                             window.mx.ui.exception(__("Could not download file"));
@@ -740,9 +742,9 @@ module.exports = (function () {
         // so the window is set to `_system` which properly handles these schemes.
         window.open = function (strUrl, strWindowName, strWindowFeatures, callbacks) {
             if (/^(mailto:|sms:|tel:)/.test(strUrl)) {
-                return cordova.InAppBrowser.open(strUrl, "_system", strWindowFeatures, callbacks)
+                return cordova.InAppBrowser.open(strUrl, "_system", "enableViewPortScale=yes,location=no,toolbarcolor=#ffffff,hidenavigationbuttons=yes", callbacks)
             } else {
-                return cordova.InAppBrowser.open(strUrl, strWindowName, strWindowFeatures, callbacks);
+                return cordova.InAppBrowser.open(strUrl, strWindowName, "enableViewPortScale=yes,location=no,toolbarcolor=#ffffff,hidenavigationbuttons=yes", callbacks);
             }
         };
     };
