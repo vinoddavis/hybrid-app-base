@@ -9,6 +9,7 @@ import Pin from "./pin";
 import * as PinView from "./pinView";
 import * as FingerprintView from "./fingerprintView";
 import SecureStore from "./secure-store";
+import FileStore from "./file-store";
 import LocalStore from "./local-store";
 
 module.exports = (function () {
@@ -119,7 +120,7 @@ module.exports = (function () {
     };
 
     var createTokenStore = function (requirePin, authSupplied) {
-        var tokenStore = new TokenStore(requirePin ? SecureStore : LocalStore);
+        var tokenStore = new TokenStore(requirePin ? SecureStore : FileStore);
 
         return {
             set: function (token, callback) {
@@ -133,7 +134,16 @@ module.exports = (function () {
                         console.log("Got TOKEN " + token);
                         if (callback) callback(token);
                     }, function (e) {
-                        if (callback) callback(undefined);
+                        // Fallback
+                        const localTokenStore = new TokenStore(LocalStore);
+                        localTokenStore.get().then(function(token) {
+                            if (token) {
+                                tokenStore.set(token).then(callback, callback);
+                                if (callback) callback(token);
+                            } else {
+                                if (callback) callback(undefined);
+                            }
+                        });
                     });
                 } else {
                     console.log("Not able to get token since no auth has been provided");
@@ -312,7 +322,7 @@ module.exports = (function () {
                         });
                     });
                     var cookiePromise2 = new Promise(function (resolve2) {
-                        if (cordova.platformId === "android") {
+                        if (cordova.platformId === "android" && window.cookies) {
                             console.info("Will remove Crosswalk cookies");
                             window.cookies.clear(resolve2, () => {
                                 console.info("Failed to clear Crosswalk cookies");
@@ -780,6 +790,7 @@ module.exports = (function () {
 
         setupDirectoryLocations();
 
+        const fileTokenStore = new TokenStore(FileStore);
         const localTokenStore = new TokenStore(LocalStore);
         const secureTokenStore = (persistentSessionEnabled && persistentSessionForceSecurity) ? new TokenStore(SecureStore) : undefined;
 
@@ -804,6 +815,8 @@ module.exports = (function () {
 
         const cleanUpRemains = async function () {
             try {
+                console.info("Will remove token in fileStore");
+                await reflect(fileTokenStore.remove());
                 console.info("Will remove token in localStore");
                 await reflect(localTokenStore.remove());
                 console.info("Will remove token in secureStore");
@@ -817,7 +830,7 @@ module.exports = (function () {
                         resolve();
                     });
                 });
-                if (cordova.platformId === "android") {
+                if (cordova.platformId === "android" && window.cookies) {
                     await new Promise((resolve) => {
                         console.info("Will remove Crosswalk cookies");
                         window.cookies.clear(resolve, () => {
@@ -871,7 +884,7 @@ module.exports = (function () {
                         });
                     });
                     var cookiePromise2 = new Promise(function (resolve2) {
-                        if (cordova.platformId === "android") {
+                        if (cordova.platformId === "android" && window.cookies) {
                             console.info("Will remove Crosswalk cookies");
                             window.cookies.clear(resolve2, () => {
                                 console.info("Failed to clear Crosswalk cookies");
