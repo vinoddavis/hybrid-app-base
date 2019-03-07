@@ -216,7 +216,7 @@ module.exports = (function () {
                     }
                 },
                 session: {
-                    shouldGenerateToken: requirePin,
+                    shouldGenerateToken: false, //ET 3/7/2019 Let tokens be created entirely by the app instead
                     tokenStore: createTokenStore(requirePin, authSupplied)
                 },
                 ui: {
@@ -268,6 +268,8 @@ module.exports = (function () {
 
                         configureAndConfirm(__("Set up a PIN"));
                     } else {
+                        //Need to figure out if mx if available here
+
                         startClient();
                     }
 
@@ -847,9 +849,14 @@ module.exports = (function () {
         const syncAndStartup = async function () {
             const [config, resourcesUrl] = await synchronizeResources(appUrl, enableOffline, shouldDownloadFn, updateAsync);
             // check here since the app may not have been re-initialized
-            const authProvided = (window.localStorage.getItem("mx-user-finger") === "true" ||
-                window.localStorage.getItem("mx-user-pin") === "true" ||
-                window.localStorage.getItem("mx-user-token") === "true");
+            // prioritize sessionStorage flags over localStorage flags
+            const mxFinger = window.sessionStorage.getItem("mx-user-finger") ? window.sessionStorage.getItem("mx-user-finger") : window.localStorage.getItem("mx-user-finger")
+            const mxPin = window.sessionStorage.getItem("mx-user-pin") ? window.sessionStorage.getItem("mx-user-pin") : window.localStorage.getItem("mx-user-pin")
+            const mxToken = window.sessionStorage.getItem("mx-user-token") ? window.sessionStorage.getItem("mx-user-token") : window.localStorage.getItem("mx-user-token")
+            
+            const authProvided = (mxFinger === "true" ||
+                mxPin === "true" ||
+                mxToken === "true");
             await startup(config, resourcesUrl, appUrl, enableOffline, (persistentSessionEnabled && persistentSessionForceSecurity), authProvided);
         };
 
@@ -872,8 +879,9 @@ module.exports = (function () {
                 } else {
                     console.info("Mx not loaded, so cannot log out");
                     console.info("clearing fingerprint and pin flags...");
-                    window.localStorage.setItem("mx-user-finger", "false");
-                    window.localStorage.setItem("mx-user-pin", "false");
+                    //Set an intent for this session to not user finger or touch
+                    window.sessionStorage.setItem("mx-user-finger", "false");
+                    window.sessionStorage.setItem("mx-user-pin", "false");
                     console.info("cleared fingerprint and pin flags");
                     console.info("clearing cookies...");
                     var cookiePromise1 = new Promise(function (resolve1) {

@@ -6,8 +6,8 @@ document.addEventListener("deviceready", function() {
     // alert("hello yalc");
     Settings.loadJSON("settings.json", function(response) {
         let settings = JSON.parse(response);
-        var userPin = localStorage.getItem("mx-user-pin") === "true",
-            userFingerprint = localStorage.getItem("mx-user-finger") === "true",
+        var userPin = window.sessionStorage.getItem("mx-user-pin") ? window.sessionStorage.getItem("mx-user-pin") === "true" : window.localStorage.getItem("mx-user-pin") === "true",
+            userFingerprint = window.sessionStorage.getItem("mx-user-finger") ? window.sessionStorage.getItem("mx-user-finger") === "true" : window.localStorage.getItem("mx-user-finger") === "true",
             userToken = localStorage.getItem("mx-user-token") === "true";
 
         MxApp.initialize(settings.url, settings.enableOffline, settings.persistentSession.enabled,
